@@ -1,0 +1,7 @@
+org/acme/MyEntity.class
+Entities/Vote.class
+Entities/Choice.class
+Entities/Voter.class
+org/acme/GreetingResource.class
+org/acme/MyEntityResource.class
+Entities/Poll.class
