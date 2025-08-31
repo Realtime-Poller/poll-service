@@ -1,4 +1,4 @@
-package Entities;
+package com.pollservice.poll;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.ManyToOne;

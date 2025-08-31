@@ -1,4 +1,4 @@
-package Entities;
+package com.pollservice.poll;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
