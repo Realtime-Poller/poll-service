@@ -1,7 +1,10 @@
-/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/Entities/Choice.java
-/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/Entities/Poll.java
-/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/Entities/Vote.java
-/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/Entities/Voter.java
-/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/org/acme/GreetingResource.java
-/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/org/acme/MyEntity.java
-/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/org/acme/MyEntityResource.java
+/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/QuarkusApplication.java
+/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/Choice.java
+/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/Poll.java
+/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/PollResource.java
+/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/PollService.java
+/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/Vote.java
+/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/Voter.java
+/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/dto/CreatePollRequest.java
+/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/dto/PollResponse.java
+/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/shared/AuthenticatedUser.java
