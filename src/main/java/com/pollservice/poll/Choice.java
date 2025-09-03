@@ -1,11 +1,14 @@
 package com.pollservice.poll;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import jakarta.persistence.*;
 
 @Entity
-public class Choice extends PanacheEntity {
+public class Choice extends PanacheEntityBase {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
+
     private String text;
 
     @ManyToOne

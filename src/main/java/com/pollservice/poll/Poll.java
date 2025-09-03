@@ -1,22 +1,28 @@
 package com.pollservice.poll;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import jakarta.validation.constraints.NotBlank;
 
 import java.time.Instant;
 import java.util.List;
 
 @Entity
-public class Poll extends PanacheEntity {
+public class Poll extends PanacheEntityBase {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
+
+    @NotBlank(message = "Title must not be blank at the entity level.")
+    @Column(length = 200, nullable = false)
     private String title;
 
+    @Column(length = 5000)
     private String description;
 
     private Instant date;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL)
     private List<Choice> choices;
 
     public String getTitle() {
