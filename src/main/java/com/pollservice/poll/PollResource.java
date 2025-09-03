@@ -5,6 +5,7 @@ import com.pollservice.poll.dto.CreatePollRequest;
 import com.pollservice.poll.dto.PollResponse;
 import com.pollservice.shared.AuthenticatedUser;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
@@ -19,7 +20,7 @@ public class PollResource {
 
     @POST
     @Path("")
-    public Response createPoll(CreatePollRequest createPollRequest) {
+    public Response createPoll(@Valid CreatePollRequest createPollRequest) {
         PollResponse pollResponse = pollService.createPoll(createPollRequest, authenticatedUser);
         return Response.status(Response.Status.CREATED).entity(pollResponse).build();
     }
