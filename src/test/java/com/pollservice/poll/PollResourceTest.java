@@ -2,9 +2,15 @@ package com.pollservice.poll;
 
 import com.pollservice.poll.dto.CreatePollRequest;
 import com.pollservice.poll.dto.PollResponse;
+import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static io.restassured.RestAssured.given;
 import static io.smallrye.common.constraint.Assert.assertNotNull;
@@ -12,6 +18,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 public class PollResourceTest {
+    private Long id;
+    private Instant createdTimestamp;
+    private String title;
+    private String description;
+
+    @Transactional
+    @BeforeEach
+    public void setup() {
+        Instant now = Instant.now();
+        Poll poll = new Poll();
+        poll.setTitle("test poll title");
+        poll.setDescription("test poll description");
+        poll.setDate(now);
+        poll.persist();
+
+        id = poll.id;
+        title = poll.getTitle();
+        description = poll.getDescription();
+        createdTimestamp = poll.getDate();
+
+    }
+
     @Test
     public void testCreatePoll() {
         //Arrange
@@ -161,5 +189,36 @@ public class PollResourceTest {
                 .post("/polls")
                 .then()
                 .statusCode(400);
+    }
+
+    @Test
+    public void testGetPoll() {
+        // Act & Assert
+        PollResponse pollResponse =
+                given()
+                        .contentType(ContentType.JSON)
+                        .when()
+                        .get("/polls/{id}", id)
+                        .then()
+                        .statusCode(200)
+                        .extract().as(PollResponse.class);
+
+        assertEquals("test poll title", pollResponse.title);
+        assertEquals("test poll description", pollResponse.description);
+        assertEquals(createdTimestamp.truncatedTo(ChronoUnit.MILLIS), pollResponse.createdTimestamp.truncatedTo(ChronoUnit.MILLIS));
+        assertEquals(id, pollResponse.id);
+    }
+
+    @Test
+    public void testGetPoll_NonExistingId() {
+        //Assert
+        Long nonExistingId = id + 100;
+        //Act & Assert
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/polls/{id}", nonExistingId)
+                .then()
+                .statusCode(404);
     }
 }
