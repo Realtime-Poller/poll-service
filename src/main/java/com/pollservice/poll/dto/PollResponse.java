@@ -11,10 +11,13 @@ public class PollResponse {
 
     public Instant createdTimestamp;
 
-    public PollResponse(Long id, String title, String description, Instant createdTimestamp) {
+    public Instant lastUpdatedTimestamp;
+
+    public PollResponse(Long id, String title, String description, Instant createdTimestamp, Instant lastUpdatedTimestamp) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.createdTimestamp = createdTimestamp;
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 }

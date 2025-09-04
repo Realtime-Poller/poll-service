@@ -2,12 +2,11 @@ package com.pollservice.poll;
 
 import com.pollservice.poll.dto.CreatePollRequest;
 import com.pollservice.poll.dto.PollResponse;
+import com.pollservice.poll.dto.UpdatePollRequest;
 import com.pollservice.shared.AuthenticatedUser;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
-
-import java.net.Authenticator;
 
 @ApplicationScoped
 public class PollService {
@@ -17,7 +16,6 @@ public class PollService {
         Poll poll = new Poll();
         poll.setTitle(createPollRequest.title);
         poll.setDescription(createPollRequest.description);
-        poll.setDate(java.time.Instant.now());
 
         poll.persist();
 
@@ -25,7 +23,8 @@ public class PollService {
                 poll.id,
                 poll.getTitle(),
                 poll.getDescription(),
-                poll.getDate()
+                poll.getCreatedTimestamp(),
+                poll.getLastUpdatedTimestamp()
         );
     }
 
@@ -39,7 +38,30 @@ public class PollService {
                 poll.id,
                 poll.getTitle(),
                 poll.getDescription(),
-                poll.getDate()
+                poll.getCreatedTimestamp(),
+                poll.getLastUpdatedTimestamp()
+        );
+    }
+
+    public PollResponse updatePoll(long id, UpdatePollRequest updatePollRequest, AuthenticatedUser authenticatedUser) {
+        Poll poll = Poll.findById(id);
+        if (poll == null) {
+            throw new NotFoundException("Poll not found");
+        }
+
+        if(null != updatePollRequest.title) {
+            poll.setTitle(updatePollRequest.title);
+        }
+        if(null != updatePollRequest.description) {
+            poll.setDescription(updatePollRequest.description);
+        }
+
+        return new PollResponse(
+                poll.id,
+                poll.getTitle(),
+                poll.getDescription(),
+                poll.getCreatedTimestamp(),
+                poll.getLastUpdatedTimestamp()
         );
     }
 }

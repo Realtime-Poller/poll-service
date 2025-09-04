@@ -3,6 +3,7 @@ package com.pollservice.poll;
 
 import com.pollservice.poll.dto.CreatePollRequest;
 import com.pollservice.poll.dto.PollResponse;
+import com.pollservice.poll.dto.UpdatePollRequest;
 import com.pollservice.shared.AuthenticatedUser;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -28,6 +29,13 @@ public class PollResource {
     @Path("/{id}")
     public Response getPoll(@PathParam("id") Long id) {
         PollResponse pollResponse = pollService.getPoll(id, authenticatedUser);
+        return Response.status(Response.Status.OK).entity(pollResponse).build();
+    }
+
+    @PATCH
+    @Path("/{id}")
+    public Response updatePoll(@PathParam("id") Long id, @Valid UpdatePollRequest updatePollRequest) {
+        PollResponse pollResponse = pollService.updatePoll(id, updatePollRequest, authenticatedUser);
         return Response.status(Response.Status.OK).entity(pollResponse).build();
     }
 }
