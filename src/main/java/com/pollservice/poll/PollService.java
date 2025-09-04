@@ -5,6 +5,7 @@ import com.pollservice.poll.dto.PollResponse;
 import com.pollservice.shared.AuthenticatedUser;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
 
 import java.net.Authenticator;
 
@@ -20,12 +21,25 @@ public class PollService {
 
         poll.persist();
 
-        PollResponse pollResponse = new PollResponse();
-        pollResponse.id = poll.id;
-        pollResponse.title = poll.getTitle();
-        pollResponse.description = poll.getDescription();
-        pollResponse.createdTimestamp = poll.getDate();
+        return new PollResponse(
+                poll.id,
+                poll.getTitle(),
+                poll.getDescription(),
+                poll.getDate()
+        );
+    }
 
-        return pollResponse;
+    public PollResponse getPoll(long id, AuthenticatedUser authenticatedUser) {
+        Poll poll = Poll.findById(id);
+        if (poll == null) {
+            throw new NotFoundException("Poll not found");
+        }
+
+        return new PollResponse(
+                poll.id,
+                poll.getTitle(),
+                poll.getDescription(),
+                poll.getDate()
+        );
     }
 }
