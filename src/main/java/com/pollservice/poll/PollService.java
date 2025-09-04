@@ -7,8 +7,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 
-import java.net.Authenticator;
-
 @ApplicationScoped
 public class PollService {
 
@@ -17,7 +15,6 @@ public class PollService {
         Poll poll = new Poll();
         poll.setTitle(createPollRequest.title);
         poll.setDescription(createPollRequest.description);
-        poll.setDate(java.time.Instant.now());
 
         poll.persist();
 
@@ -25,7 +22,7 @@ public class PollService {
                 poll.id,
                 poll.getTitle(),
                 poll.getDescription(),
-                poll.getDate()
+                poll.getCreatedTimestamp()
         );
     }
 
@@ -39,7 +36,7 @@ public class PollService {
                 poll.id,
                 poll.getTitle(),
                 poll.getDescription(),
-                poll.getDate()
+                poll.getCreatedTimestamp()
         );
     }
 }

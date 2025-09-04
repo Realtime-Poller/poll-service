@@ -2,7 +2,6 @@ package com.pollservice.poll;
 
 import com.pollservice.poll.dto.CreatePollRequest;
 import com.pollservice.poll.dto.PollResponse;
-import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import jakarta.transaction.Transactional;
@@ -30,14 +29,12 @@ public class PollResourceTest {
         Poll poll = new Poll();
         poll.setTitle("test poll title");
         poll.setDescription("test poll description");
-        poll.setDate(now);
         poll.persist();
 
         id = poll.id;
         title = poll.getTitle();
         description = poll.getDescription();
-        createdTimestamp = poll.getDate();
-
+        createdTimestamp = poll.getCreatedTimestamp();
     }
 
     @Test

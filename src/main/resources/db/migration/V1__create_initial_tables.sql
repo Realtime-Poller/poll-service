@@ -2,7 +2,8 @@ CREATE TABLE Poll(
     id BIGSERIAL primary key,
     title varchar(200) not null,
     description varchar(5000),
-    date timestamp
+    createdTimestamp timestamp,
+    lastUpdatedTimestamp timestamp
 );
 
 CREATE TABLE Choice(

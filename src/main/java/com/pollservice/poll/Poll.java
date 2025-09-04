@@ -3,6 +3,8 @@ package com.pollservice.poll;
 import jakarta.persistence.*;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.validation.constraints.NotBlank;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.List;
@@ -20,7 +22,11 @@ public class Poll extends PanacheEntityBase {
     @Column(length = 5000)
     private String description;
 
-    private Instant date;
+    @CreationTimestamp
+    private Instant createdTimestamp;
+
+    @UpdateTimestamp
+    private Instant lastUpdatedTimestamp;
 
     @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL)
     private List<Choice> choices;
@@ -41,12 +47,12 @@ public class Poll extends PanacheEntityBase {
         this.description = description;
     }
 
-    public Instant getDate() {
-        return date;
+    public Instant getCreatedTimestamp() {
+        return createdTimestamp;
     }
 
-    public void setDate(Instant date) {
-        this.date = date;
+    public void setCreatedTimestamp(Instant date) {
+        this.createdTimestamp = date;
     }
 
     public List<Choice> getChoices() {
@@ -57,4 +63,11 @@ public class Poll extends PanacheEntityBase {
         this.choices = choices;
     }
 
+    public Instant getLastUpdatedTimestamp() {
+        return lastUpdatedTimestamp;
+    }
+
+    public void setLastUpdatedTimestamp(Instant lastUpdatedTimestamp) {
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    }
 }
