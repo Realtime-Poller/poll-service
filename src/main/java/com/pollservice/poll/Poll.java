@@ -22,11 +22,21 @@ public class Poll extends PanacheEntityBase {
     @Column(length = 5000)
     private String description;
 
-    @CreationTimestamp
+    //@CreationTimestamp
     private Instant createdTimestamp;
 
-    @UpdateTimestamp
+    //@UpdateTimestamp
     private Instant lastUpdatedTimestamp;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdTimestamp = Instant.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.lastUpdatedTimestamp = Instant.now();
+    }
 
     @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL)
     private List<Choice> choices;
