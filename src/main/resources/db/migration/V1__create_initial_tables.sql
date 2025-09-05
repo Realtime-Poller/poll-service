@@ -3,7 +3,8 @@ CREATE TABLE Poll(
     title varchar(200) not null,
     description varchar(5000),
     createdTimestamp timestamp,
-    lastUpdatedTimestamp timestamp
+    lastUpdatedTimestamp timestamp,
+    owner_id BIGINT REFERENCES USERS(id)
 );
 
 CREATE TABLE Choice(
@@ -21,3 +22,11 @@ CREATE TABLE Vote(
     choice_id BIGINT REFERENCES Choice(id),
     voter_id UUID REFERENCES Voter(uuid)
 );
+
+CREATE TABLE USERS(
+    id BIGSERIAL primary key,
+    email varchar(254) not null,
+    password varchar(60) not null,
+    createdTimestamp timestamp,
+    lastUpdatedTimestamp timestamp
+)
