@@ -32,4 +32,4 @@ jobs:
           cache: maven
 
       - name: Build & run tests
-        run: mvn -B clean test
+        run: mvn -B clean verify -Dquarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/pmp_db_test -Dquarkus.datasource.username=postgres -Dquarkus.datasource.password=postgres
