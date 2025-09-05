@@ -378,4 +378,24 @@ public class PollResourceTest {
         assertEquals(description, pollResponse.description);
         assertNull(pollResponse.lastUpdatedTimestamp);
     }
+
+    @Test
+    public void testDeletePoll_HappyPath() {
+        //Act & Assert
+        given()
+                .when()
+                .delete("/polls/{id}", id)
+                .then()
+                .statusCode(204);
+    }
+
+    @Test
+    public void testDeletePoll_NoSuchId() {
+        Long nonExistingId = id + 100;
+        given()
+                .when()
+                .delete("/polls/{id}", nonExistingId)
+                .then()
+                .statusCode(404);
+    }
 }

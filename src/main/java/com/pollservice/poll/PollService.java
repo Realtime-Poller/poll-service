@@ -77,4 +77,14 @@ public class PollService {
                 poll.getLastUpdatedTimestamp()
         );
     }
+
+    @Transactional
+    public void deletePoll(long id, AuthenticatedUser authenticatedUser) {
+        Poll poll = Poll.findById(id);
+        if (poll == null) {
+            throw new NotFoundException("Poll not found");
+        }
+
+        poll.delete();
+    }
 }

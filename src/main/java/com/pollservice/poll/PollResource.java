@@ -38,4 +38,12 @@ public class PollResource {
         PollResponse pollResponse = pollService.updatePoll(id, updatePollRequest, authenticatedUser);
         return Response.status(Response.Status.OK).entity(pollResponse).build();
     }
+
+    @DELETE
+    @Path("/{id}")
+    public Response deletePoll(@PathParam("id") Long id) {
+        pollService.deletePoll(id, authenticatedUser);
+
+        return Response.status(Response.Status.NO_CONTENT).build();
+    }
 }
