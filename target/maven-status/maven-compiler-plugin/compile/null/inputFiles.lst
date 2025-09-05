@@ -7,4 +7,5 @@
 /home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/Voter.java
 /home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/dto/CreatePollRequest.java
 /home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/dto/PollResponse.java
+/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/dto/UpdatePollRequest.java
 /home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/shared/AuthenticatedUser.java

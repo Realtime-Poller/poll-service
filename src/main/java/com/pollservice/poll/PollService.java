@@ -4,9 +4,12 @@ import com.pollservice.poll.dto.CreatePollRequest;
 import com.pollservice.poll.dto.PollResponse;
 import com.pollservice.poll.dto.UpdatePollRequest;
 import com.pollservice.shared.AuthenticatedUser;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
+
+import java.time.Instant;
 
 @ApplicationScoped
 public class PollService {
@@ -43,17 +46,27 @@ public class PollService {
         );
     }
 
+    @Transactional
     public PollResponse updatePoll(long id, UpdatePollRequest updatePollRequest, AuthenticatedUser authenticatedUser) {
         Poll poll = Poll.findById(id);
         if (poll == null) {
             throw new NotFoundException("Poll not found");
         }
 
-        if(null != updatePollRequest.title) {
+        boolean updated = false;
+
+        if (updatePollRequest.title != null) {
             poll.setTitle(updatePollRequest.title);
+            updated = true;
         }
-        if(null != updatePollRequest.description) {
+
+        if (updatePollRequest.description != null) {
             poll.setDescription(updatePollRequest.description);
+            updated = true;
+        }
+
+        if (updated) {
+            poll.setLastUpdatedTimestamp(Instant.now()); // Added update timestamp due to timing issues with @PreUpdate flag on hibernate
         }
 
         return new PollResponse(

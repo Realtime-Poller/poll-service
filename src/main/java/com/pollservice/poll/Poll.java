@@ -28,6 +28,7 @@ public class Poll extends PanacheEntityBase {
     //@UpdateTimestamp
     private Instant lastUpdatedTimestamp;
 
+
     @PrePersist
     public void prePersist() {
         this.createdTimestamp = Instant.now();
