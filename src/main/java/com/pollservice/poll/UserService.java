@@ -50,7 +50,6 @@ public class UserService {
         long tokenDurationInSeconds = 3600L;
         String token = Jwt.issuer("https://poll-service-konrad.com")
                 .subject(user.id.toString())
-                .upn(user.getEmail())
                 .groups(new HashSet<>(Arrays.asList("user")))
                 .expiresIn(tokenDurationInSeconds)
                 .sign();
