@@ -28,6 +28,9 @@ public class Poll extends PanacheEntityBase {
     //@UpdateTimestamp
     private Instant lastUpdatedTimestamp;
 
+    @ManyToOne
+    private User owner;
+
 
     @PrePersist
     public void prePersist() {
@@ -72,6 +75,14 @@ public class Poll extends PanacheEntityBase {
 
     public void setChoices(List<Choice> choices) {
         this.choices = choices;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 
     public Instant getLastUpdatedTimestamp() {
