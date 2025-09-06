@@ -6,6 +6,8 @@ CREATE TABLE USERS(
     lastUpdatedTimestamp timestamp
 );
 
+CREATE UNIQUE INDEX users_email_lower_case_idx ON users (LOWER(email));
+
 CREATE TABLE Poll(
     id BIGSERIAL primary key,
     title varchar(200) not null,

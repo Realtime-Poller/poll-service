@@ -1,5 +1,6 @@
 package com.pollservice.poll;
 
+import com.pollservice.api.exception.EmailAlreadyExistsException;
 import com.pollservice.poll.dto.CreateUserRequest;
 import com.pollservice.poll.dto.UserResponse;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -11,16 +12,15 @@ import io.quarkus.elytron.security.common.BcryptUtil;
 public class UserService {
     @Transactional
     public UserResponse createUser(CreateUserRequest createUserRequest) {
-        String emailToCheck = createUserRequest.email;
+        String normalizedEmail = createUserRequest.email.toLowerCase();
 
-        long count = User.count("email = ?1", emailToCheck);
-
+        long count = User.count("email = ?1", normalizedEmail);
         if(count > 0) {
-            throw new IllegalArgumentException("User with email " + emailToCheck + " already exists");
+            throw new EmailAlreadyExistsException("Email " + createUserRequest.email + " already exists");
         }
 
         User user = new User();
-        user.setEmail(createUserRequest.email);
+        user.setEmail(normalizedEmail);
         user.setPassword(BcryptUtil.bcryptHash(createUserRequest.password));
 
         user.persist();
