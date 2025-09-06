@@ -1,4 +1,6 @@
 /home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/QuarkusApplication.java
+/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/api/exception/EmailAlreadyExistsException.java
+/home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/api/exception/EmailAlreadyExistsExceptionMapper.java
 /home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/Choice.java
 /home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/Poll.java
 /home/klames/Programmierung/Realtime-Poller/poll-service/src/main/java/com/pollservice/poll/PollResource.java
