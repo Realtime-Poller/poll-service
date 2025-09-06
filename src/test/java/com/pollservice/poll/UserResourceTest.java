@@ -1,15 +1,12 @@
 package com.pollservice.poll;
 
-import com.pollservice.poll.dto.CreateUserRequest;
-import com.pollservice.poll.dto.PollResponse;
-import com.pollservice.poll.dto.UserResponse;
+import com.pollservice.poll.dto.*;
+import io.quarkus.elytron.security.common.BcryptUtil;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.time.Instant;
 
 import static io.restassured.RestAssured.given;
 import static io.smallrye.common.constraint.Assert.assertNotNull;
@@ -17,14 +14,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 public class UserResourceTest {
-    private User user = new User();
+    private String existingEmail;
 
     @Transactional
     @BeforeEach
     public void defaultUser() {
-        user.setEmail("default@existing.com");
-        user.setPassword("userpassword");
-        user.persist();
+        User.deleteAll();
+
+        User testUser = new User();
+        this.existingEmail = "default@existing.com";
+        String password = "userpassword";
+
+        testUser.setEmail(this.existingEmail);
+        testUser.setPassword(BcryptUtil.bcryptHash(password));
+        testUser.persist();
     }
 
     @Test
@@ -100,7 +103,7 @@ public class UserResourceTest {
     @Transactional
     public void testCreateUser_emailAlreadyInUse() {
         CreateUserRequest createUserRequest = new CreateUserRequest();
-        createUserRequest.email = user.getEmail();
+        createUserRequest.email = existingEmail;
         createUserRequest.password = "testpassword";
 
         given()
@@ -116,7 +119,7 @@ public class UserResourceTest {
     @Transactional
     public void testCreateUser_existingEmailCaseSensitive() {
         CreateUserRequest createUserRequest = new CreateUserRequest();
-        createUserRequest.email = user.getEmail().toUpperCase();
+        createUserRequest.email = existingEmail.toUpperCase();
         createUserRequest.password = "password";
 
         given()
@@ -132,7 +135,7 @@ public class UserResourceTest {
     @Transactional
     public void testCreateUser_passwordTooShort() {
         CreateUserRequest createUserRequest = new CreateUserRequest();
-        createUserRequest.email = user.getEmail();
+        createUserRequest.email = existingEmail;
         createUserRequest.password = "1234567";
 
         given()
@@ -172,6 +175,114 @@ public class UserResourceTest {
                 .body(createUserRequest)
                 .when()
                 .post("/users")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    public void testLogin(){
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.email = existingEmail;
+        loginRequest.password = "userpassword";
+
+        LoginResponse loginResponse = given()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when()
+                .post("/users/login")
+                .then()
+                .statusCode(200)
+                .extract().as(LoginResponse.class);
+
+        assertNotNull(loginResponse.token);
+    }
+
+    @Test
+    public void testLogin_invalidPassword(){
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.email = existingEmail;
+        loginRequest.password = "wrongpassword";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when()
+                .post("/users/login")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    public void testLogin_invalidEmail(){
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.email = "invalid@email";
+        loginRequest.password = "password";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when()
+                .post("/users/login")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    public void testLogin_isCaseInsensitive(){
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.email = existingEmail.toUpperCase();
+        loginRequest.password = "userpassword";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when()
+                .post("/users/login")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test
+    public void testLogin_emailNull(){
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.email = null;
+        loginRequest.password = "password";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when()
+                .post("/users/login")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    public void testLogin_passwordNull(){
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.email = existingEmail;
+        loginRequest.password = null;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when()
+                .post("/users/login")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    public void testLogin_invalidEmailFormat(){
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.email = "not-an-email";
+        loginRequest.password = "password";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when()
+                .post("/users/login")
                 .then()
                 .statusCode(400);
     }
