@@ -1,12 +1,18 @@
 package com.pollservice.poll;
 
+import com.pollservice.api.exception.InvalidCredentialsException;
 import com.pollservice.poll.dto.*;
 import io.quarkus.elytron.security.common.BcryptUtil;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import io.smallrye.jwt.build.Jwt;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import static io.restassured.RestAssured.given;
 import static io.smallrye.common.constraint.Assert.assertNotNull;
@@ -285,5 +291,103 @@ public class UserResourceTest {
                 .post("/users/login")
                 .then()
                 .statusCode(400);
+    }
+
+
+    @Test
+    public void testGetMe() {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.email = existingEmail;
+        loginRequest.password = "userpassword";
+
+        String token =
+                given()
+                        .contentType(ContentType.JSON)
+                        .body(loginRequest)
+                        .when()
+                        .post("/users/login")
+                        .then()
+                        .statusCode(200)
+                        .extract().path("token");
+
+        UserResponse userResponse =
+                given()
+                        .header("Authorization", "Bearer " + token)
+                        .when()
+                        .get("/users/me")
+                        .then()
+                        .statusCode(200)
+                        .extract().as(UserResponse.class);
+
+        assertEquals(existingEmail, userResponse.email);
+        assertNotNull(userResponse.id);
+    }
+
+    @Test
+    public void testGetMe_FailsWithoutToken() {
+        given()
+                .when()
+                .get("/users/me")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    public void testGetMe_FailsWithInvalidToken() {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.email = existingEmail;
+        loginRequest.password = "userpassword";
+
+        String token =
+                given()
+                        .contentType(ContentType.JSON)
+                        .body(loginRequest)
+                        .when()
+                        .post("/users/login")
+                        .then()
+                        .statusCode(200)
+                        .extract().path("token");
+
+        token = token + "invalid";
+        given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get("/users/me")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    public void testGetMe_FailsWithExpiredToken() {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.email = existingEmail;
+        loginRequest.password = "userpassword";
+
+        String normalizedEmail = loginRequest.email.toLowerCase();
+        User user = User.find("email", normalizedEmail).firstResult();
+
+        if (user == null) {
+            throw new InvalidCredentialsException("Invalid credentials");
+        }
+
+        if (!BcryptUtil.matches(loginRequest.password, user.getPassword())) {
+            throw new InvalidCredentialsException("Invalid credentials");
+        }
+
+        Instant issuedAt = Instant.now().minusSeconds(7200);
+        long tokenDurationInSeconds = 3600L;
+        String token = Jwt.issuer("https://poll-service-konrad.com")
+                .subject(user.id.toString())
+                .groups(new HashSet<>(Arrays.asList("user")))
+                .expiresIn(tokenDurationInSeconds)
+                .issuedAt(issuedAt)
+                .sign();
+
+        given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get("/users/me")
+                .then()
+                .statusCode(401);
     }
 }
