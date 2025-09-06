@@ -1,3 +1,11 @@
+CREATE TABLE USERS(
+    id BIGSERIAL primary key,
+    email varchar(254) not null,
+    password varchar(60) not null,
+    createdTimestamp timestamp,
+    lastUpdatedTimestamp timestamp
+);
+
 CREATE TABLE Poll(
     id BIGSERIAL primary key,
     title varchar(200) not null,
@@ -23,10 +31,3 @@ CREATE TABLE Vote(
     voter_id UUID REFERENCES Voter(uuid)
 );
 
-CREATE TABLE USERS(
-    id BIGSERIAL primary key,
-    email varchar(254) not null,
-    password varchar(60) not null,
-    createdTimestamp timestamp,
-    lastUpdatedTimestamp timestamp
-)

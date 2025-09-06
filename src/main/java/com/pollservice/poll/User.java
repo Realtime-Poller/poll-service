@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Entity
+@Table(name = "users")
 public class User extends PanacheEntityBase{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
