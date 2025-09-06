@@ -31,5 +31,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Create Key Files from Secrets
+        run: |
+          mkdir -p src/main/resources/keys
+          echo "${{ secrets.PRIVATE_KEY }}" > src/main/resources/keys/privateKey.pem
+          echo "${{ secrets.PUBLIC_KEY }}" > src/main/resources/keys/publicKey.pem
+
       - name: Build & run tests
         run: mvn -B clean verify -Dquarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/pmp_db_test -Dquarkus.datasource.username=postgres -Dquarkus.datasource.password=postgres
