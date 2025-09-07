@@ -45,7 +45,10 @@ public class PollResource {
     @PATCH
     @Path("/{id}")
     public Response updatePoll(@PathParam("id") Long id, @Valid UpdatePollRequest updatePollRequest) {
-        PollResponse pollResponse = pollService.updatePoll(id, updatePollRequest, authenticatedUser);
+        String realUserId = securityIdentity.getPrincipal().getName();
+        AuthenticatedUser realUser = new AuthenticatedUser(realUserId);
+
+        PollResponse pollResponse = pollService.updatePoll(id, updatePollRequest, realUser);
         return Response.status(Response.Status.OK).entity(pollResponse).build();
     }
 

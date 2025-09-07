@@ -5,8 +5,11 @@ import com.pollservice.poll.dto.PollResponse;
 import com.pollservice.poll.dto.UpdatePollRequest;
 import com.pollservice.shared.AuthenticatedUser;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.security.UnauthorizedException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotFoundException;
 
 import java.time.Instant;
@@ -51,33 +54,45 @@ public class PollService {
 
     @Transactional
     public PollResponse updatePoll(long id, UpdatePollRequest updatePollRequest, AuthenticatedUser authenticatedUser) {
-        Poll poll = Poll.findById(id);
-        if (poll == null) {
+        User suspectedPollOwner = User.findById(Long.valueOf(authenticatedUser.id()));
+        if(suspectedPollOwner == null) {
+            throw new UnauthorizedException("User not authenticated");
+        }
+
+        Poll pollToBeUpdated = Poll.findById(id);
+        if (pollToBeUpdated == null) {
             throw new NotFoundException("Poll not found");
+        }
+
+        if (!suspectedPollOwner.id.equals(pollToBeUpdated.getOwner().id)) {
+            throw new ForbiddenException("You are not allowed to update this poll");
         }
 
         boolean updated = false;
 
-        if (updatePollRequest.title != null) {
-            poll.setTitle(updatePollRequest.title);
+        if(updatePollRequest.title != null) {
+            if(updatePollRequest.title.isBlank()) {
+                throw new BadRequestException("Title, if provided, cannot be blank");
+            }
+            pollToBeUpdated.setTitle(updatePollRequest.title);
             updated = true;
         }
 
         if (updatePollRequest.description != null) {
-            poll.setDescription(updatePollRequest.description);
+            pollToBeUpdated.setDescription(updatePollRequest.description);
             updated = true;
         }
 
         if (updated) {
-            poll.setLastUpdatedTimestamp(Instant.now()); // Added update timestamp due to timing issues with @PreUpdate flag on hibernate
+            pollToBeUpdated.setLastUpdatedTimestamp(Instant.now()); // Added update timestamp due to timing issues with @PreUpdate flag on hibernate
         }
 
         return new PollResponse(
-                poll.id,
-                poll.getTitle(),
-                poll.getDescription(),
-                poll.getCreatedTimestamp(),
-                poll.getLastUpdatedTimestamp()
+                pollToBeUpdated.id,
+                pollToBeUpdated.getTitle(),
+                pollToBeUpdated.getDescription(),
+                pollToBeUpdated.getCreatedTimestamp(),
+                pollToBeUpdated.getLastUpdatedTimestamp()
         );
     }
 
