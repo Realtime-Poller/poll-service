@@ -544,21 +544,50 @@ public class PollResourceTest {
 
     @Test
     public void testDeletePoll_HappyPath() {
+        //Arrange
+        TestUserContext testUserContext = setUpNewUserAndToken("default@existing.com");
+        Poll poll = createPollForUser(testUserContext.user, "Original Valid Title", "Original Valid Description");
+
         //Act & Assert
         given()
+                .header("Authorization", "Bearer " + testUserContext.token())
                 .when()
-                .delete("/polls/{id}", id)
+                .delete("/polls/{id}", poll.id)
                 .then()
                 .statusCode(204);
+
+        //Assert database state
+        Poll shouldBeDeletedPoll = Poll.findById(poll.id);
+        assertNull(shouldBeDeletedPoll);
     }
 
     @Test
     public void testDeletePoll_NoSuchId() {
-        Long nonExistingId = id + 100;
+        //Arrange
+        TestUserContext testUserContext = setUpNewUserAndToken("default@existing.com");
+        Poll poll = createPollForUser(testUserContext.user, "Original Valid Title", "Original Valid Description");
+
+        Long nonExistingId = poll.id + 100;
         given()
+                .header("Authorization", "Bearer " + testUserContext.token())
                 .when()
                 .delete("/polls/{id}", nonExistingId)
                 .then()
                 .statusCode(404);
+    }
+
+    @Test
+    public void testDeletePoll_WrongOwner() {
+        //Arrange
+        TestUserContext testUserContext = setUpNewUserAndToken("default@existing.com");
+        Poll poll = createPollForUser(testUserContext.user, "Original Valid Title", "Original Valid Description");
+        TestUserContext otherUserContext = setUpNewUserAndToken("default@existing.de");
+
+        given()
+                .header("Authorization", "Bearer " + otherUserContext.token())
+                .when()
+                .delete("/polls/{id}", poll.id)
+                .then()
+                .statusCode(403);
     }
 }
