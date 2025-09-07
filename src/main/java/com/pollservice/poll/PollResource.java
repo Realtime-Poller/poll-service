@@ -5,6 +5,8 @@ import com.pollservice.poll.dto.CreatePollRequest;
 import com.pollservice.poll.dto.PollResponse;
 import com.pollservice.poll.dto.UpdatePollRequest;
 import com.pollservice.shared.AuthenticatedUser;
+import io.quarkus.security.identity.SecurityIdentity;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -15,13 +17,21 @@ public class PollResource {
     @Inject
     PollService pollService;
 
+    @Inject
+    SecurityIdentity securityIdentity;
+
     //fake AuthenticatedUser
     AuthenticatedUser authenticatedUser = new AuthenticatedUser("123456");
 
     @POST
     @Path("")
+    @RolesAllowed("user")
     public Response createPoll(@Valid CreatePollRequest createPollRequest) {
-        PollResponse pollResponse = pollService.createPoll(createPollRequest, authenticatedUser);
+        String realUserId = securityIdentity.getPrincipal().getName();
+
+        AuthenticatedUser realUser = new AuthenticatedUser(realUserId);
+
+        PollResponse pollResponse = pollService.createPoll(createPollRequest, realUser);
         return Response.status(Response.Status.CREATED).entity(pollResponse).build();
     }
 
@@ -35,15 +45,20 @@ public class PollResource {
     @PATCH
     @Path("/{id}")
     public Response updatePoll(@PathParam("id") Long id, @Valid UpdatePollRequest updatePollRequest) {
-        PollResponse pollResponse = pollService.updatePoll(id, updatePollRequest, authenticatedUser);
+        String realUserId = securityIdentity.getPrincipal().getName();
+        AuthenticatedUser realUser = new AuthenticatedUser(realUserId);
+
+        PollResponse pollResponse = pollService.updatePoll(id, updatePollRequest, realUser);
         return Response.status(Response.Status.OK).entity(pollResponse).build();
     }
 
     @DELETE
     @Path("/{id}")
     public Response deletePoll(@PathParam("id") Long id) {
-        pollService.deletePoll(id, authenticatedUser);
+        String realUserId = securityIdentity.getPrincipal().getName();
+        AuthenticatedUser realUser = new AuthenticatedUser(realUserId);
 
+        pollService.deletePoll(id, realUser);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 }
