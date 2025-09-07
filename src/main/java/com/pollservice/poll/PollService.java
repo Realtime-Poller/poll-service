@@ -16,9 +16,12 @@ public class PollService {
 
     @Transactional
     public PollResponse createPoll(CreatePollRequest createPollRequest, AuthenticatedUser authenticatedUser) {
+        User pollOwner = User.findById(Long.valueOf(authenticatedUser.id()));
+
         Poll poll = new Poll();
         poll.setTitle(createPollRequest.title);
         poll.setDescription(createPollRequest.description);
+        poll.setOwner(pollOwner);
 
         poll.persist();
 
