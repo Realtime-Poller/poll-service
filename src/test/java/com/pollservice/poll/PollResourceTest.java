@@ -26,7 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class PollResourceTest {
     private record TestUserContext(User user, String token) {}
 
-    private TestUserContext setUpNewUserAndToken() {
+    @Transactional
+    TestUserContext setUpNewUserAndToken() {
         User testUser = new User();
         String email = "default@existing.com";
         String password = "userpassword";
@@ -72,7 +73,6 @@ public class PollResourceTest {
     }
 
     @Test
-    @Transactional
     public void testCreatePoll() {
         //Arrange
         CreatePollRequest createPollRequest = new CreatePollRequest();
@@ -93,10 +93,52 @@ public class PollResourceTest {
                     .statusCode(201)
                     .extract().as(PollResponse.class);
 
+        // ASSERT
         assertEquals("test poll", pollResponse.title);
         assertEquals("test poll description", pollResponse.description);
-        assertNotNull(pollResponse.id);
-        assertNotNull(pollResponse.createdTimestamp);
+
+        Poll savedPoll = Poll.findById(pollResponse.id);
+
+        User testUser = testUserContext.user();
+        User pollOwner = savedPoll.getOwner();
+        assertEquals(testUser.id, pollOwner.id);
+    }
+
+    @Test
+    @Transactional
+    public void testCreatePoll_noToken() {
+        //Arrange
+        CreatePollRequest createPollRequest = new CreatePollRequest();
+        createPollRequest.title = "test poll";
+        createPollRequest.description = "test poll description";
+
+        //Act & Assert
+        given()
+                .contentType(ContentType.JSON)
+                .body(createPollRequest)
+                .when()
+                .post("/polls")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    @Transactional
+    public void testCreatePoll_InvalidToken() {
+        //Arrange
+        CreatePollRequest createPollRequest = new CreatePollRequest();
+        createPollRequest.title = "test poll";
+        createPollRequest.description = "test poll description";
+
+        //Act & Assert
+        given()
+                .header("Authorization", "Bearer " + "invalid token")
+                .contentType(ContentType.JSON)
+                .body(createPollRequest)
+                .when()
+                .post("/polls")
+                .then()
+                .statusCode(401);
     }
 
     @Test
@@ -121,7 +163,6 @@ public class PollResourceTest {
 
 
     @Test
-    @Transactional
     public void testCreatePoll_TitleMaxLength() {
         //Arrange
         CreatePollRequest createPollRequest = new CreatePollRequest();
@@ -151,7 +192,6 @@ public class PollResourceTest {
 
 
     @Test
-    @Transactional
     public void testCreatePoll_TitleTooLong() {
         //Arrange
         CreatePollRequest createPollRequest = new CreatePollRequest();
@@ -201,7 +241,6 @@ public class PollResourceTest {
     }
 
     @Test
-    @Transactional
     public void testCreatePoll_DescriptionMaxLength() {
         //Arrange
         CreatePollRequest createPollRequest = new CreatePollRequest();
