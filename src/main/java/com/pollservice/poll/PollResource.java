@@ -55,8 +55,10 @@ public class PollResource {
     @DELETE
     @Path("/{id}")
     public Response deletePoll(@PathParam("id") Long id) {
-        pollService.deletePoll(id, authenticatedUser);
+        String realUserId = securityIdentity.getPrincipal().getName();
+        AuthenticatedUser realUser = new AuthenticatedUser(realUserId);
 
+        pollService.deletePoll(id, realUser);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 }

@@ -98,11 +98,20 @@ public class PollService {
 
     @Transactional
     public void deletePoll(long id, AuthenticatedUser authenticatedUser) {
-        Poll poll = Poll.findById(id);
-        if (poll == null) {
+        User suspectedPollOwner = User.findById(Long.valueOf(authenticatedUser.id()));
+        if(suspectedPollOwner == null) {
+            throw new UnauthorizedException("User not authenticated");
+        }
+
+        Poll pollToBeDeleted = Poll.findById(id);
+        if (pollToBeDeleted == null) {
             throw new NotFoundException("Poll not found");
         }
 
-        poll.delete();
+        if (!suspectedPollOwner.id.equals(pollToBeDeleted.getOwner().id)) {
+            throw new ForbiddenException("You are not allowed to update this poll");
+        }
+
+        pollToBeDeleted.delete();
     }
 }
