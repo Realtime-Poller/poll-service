@@ -13,6 +13,7 @@ import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotFoundException;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @ApplicationScoped
 public class PollService {
@@ -29,7 +30,7 @@ public class PollService {
         poll.persist();
 
         return new PollResponse(
-                poll.id,
+                poll.publicId,
                 poll.getTitle(),
                 poll.getDescription(),
                 poll.getCreatedTimestamp(),
@@ -37,14 +38,14 @@ public class PollService {
         );
     }
 
-    public PollResponse getPoll(long id, AuthenticatedUser authenticatedUser) {
-        Poll poll = Poll.findById(id);
+    public PollResponse getPoll(UUID publicId) {
+        Poll poll = Poll.find("publicId", publicId).firstResult();
         if (poll == null) {
             throw new NotFoundException("Poll not found");
         }
 
         return new PollResponse(
-                poll.id,
+                poll.publicId,
                 poll.getTitle(),
                 poll.getDescription(),
                 poll.getCreatedTimestamp(),
@@ -88,7 +89,7 @@ public class PollService {
         }
 
         return new PollResponse(
-                pollToBeUpdated.id,
+                pollToBeUpdated.publicId,
                 pollToBeUpdated.getTitle(),
                 pollToBeUpdated.getDescription(),
                 pollToBeUpdated.getCreatedTimestamp(),

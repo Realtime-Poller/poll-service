@@ -12,6 +12,8 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 
+import java.util.UUID;
+
 @Path("/polls")
 public class PollResource {
     @Inject
@@ -36,9 +38,9 @@ public class PollResource {
     }
 
     @GET
-    @Path("/{id}")
-    public Response getPoll(@PathParam("id") Long id) {
-        PollResponse pollResponse = pollService.getPoll(id, authenticatedUser);
+    @Path("/{publicId}")
+    public Response getPoll(@PathParam("publicId") UUID publicId) {
+        PollResponse pollResponse = pollService.getPoll(publicId);
         return Response.status(Response.Status.OK).entity(pollResponse).build();
     }
 
