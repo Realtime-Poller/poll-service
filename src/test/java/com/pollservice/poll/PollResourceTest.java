@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static io.smallrye.common.constraint.Assert.assertNotNull;
@@ -305,11 +306,13 @@ public class PollResourceTest {
         TestUserContext testUserContext = setUpNewUserAndToken("default@existing.com");
         Poll poll = createPollForUser(testUserContext.user, "test poll title", "test poll description");
 
+        UUID nonExistingId = UUID.randomUUID();
+
         //Act & Assert
         given()
                 .contentType(ContentType.JSON)
                 .when()
-                .get("/polls/{publicId}", poll.publicId + "1234567890")
+                .get("/polls/{publicId}", nonExistingId)
                 .then()
                 .statusCode(404);
     }
@@ -333,7 +336,7 @@ public class PollResourceTest {
                         .contentType(ContentType.JSON)
                         .body(updatePollRequest)
                         .when()
-                        .patch("/polls/{id}", poll.id)
+                        .patch("/polls/{publicId}", poll.publicId)
                         .then()
                         .statusCode(200)
                         .extract().as(PollResponse.class);
@@ -365,7 +368,7 @@ public class PollResourceTest {
                 .contentType(ContentType.JSON)
                 .body(updatePollRequest)
                 .when()
-                .patch("/polls/{id}", poll.id)
+                .patch("/polls/{publicId}", poll.publicId)
                 .then()
                 .statusCode(403);
     }
@@ -389,7 +392,7 @@ public class PollResourceTest {
                         .contentType(ContentType.JSON)
                         .body(updatePollRequest)
                         .when()
-                        .patch("/polls/{id}", poll.id)
+                        .patch("/polls/{publicId}", poll.publicId)
                         .then()
                         .statusCode(200)
                         .extract().as(PollResponse.class);
@@ -419,7 +422,7 @@ public class PollResourceTest {
                         .contentType(ContentType.JSON)
                         .body(updatePollRequest)
                         .when()
-                        .patch("/polls/{id}", poll.id)
+                        .patch("/polls/{publicId}", poll.publicId)
                         .then()
                         .statusCode(200)
                         .extract().as(PollResponse.class);
@@ -443,7 +446,7 @@ public class PollResourceTest {
         TestUserContext testUserContext = setUpNewUserAndToken("default@existing.com");
         Poll poll = createPollForUser(testUserContext.user, "Original Valid Title", "Original Valid Description");
 
-        Long nonExistingId = poll.id + 100;
+        UUID nonExistingId = UUID.randomUUID();
 
         //Act & Assert
         given()
@@ -472,7 +475,7 @@ public class PollResourceTest {
                 .contentType(ContentType.JSON)
                 .body(updatePollRequest)
                 .when()
-                .patch("/polls/{id}", poll.id)
+                .patch("/polls/{publicId}", poll.publicId)
                 .then()
                 .statusCode(400);
     }
@@ -493,7 +496,7 @@ public class PollResourceTest {
                 .contentType(ContentType.JSON)
                 .body(updatePollRequest)
                 .when()
-                .patch("/polls/{id}", poll.id)
+                .patch("/polls/{publicId}", poll.publicId)
                 .then()
                 .statusCode(400);
     }
@@ -515,7 +518,7 @@ public class PollResourceTest {
                         .contentType(ContentType.JSON)
                         .body(updatePollRequest)
                         .when()
-                        .patch("/polls/{id}", poll.id)
+                        .patch("/polls/{publicId}", poll.publicId)
                         .then()
                         .statusCode(200)
                         .extract().as(PollResponse.class);
@@ -537,7 +540,7 @@ public class PollResourceTest {
         given()
                 .header("Authorization", "Bearer " + testUserContext.token())
                 .when()
-                .delete("/polls/{id}", poll.id)
+                .delete("/polls/{publicId}", poll.publicId)
                 .then()
                 .statusCode(204);
 
@@ -552,11 +555,11 @@ public class PollResourceTest {
         TestUserContext testUserContext = setUpNewUserAndToken("default@existing.com");
         Poll poll = createPollForUser(testUserContext.user, "Original Valid Title", "Original Valid Description");
 
-        Long nonExistingId = poll.id + 100;
+        UUID nonExistingId = UUID.randomUUID();
         given()
                 .header("Authorization", "Bearer " + testUserContext.token())
                 .when()
-                .delete("/polls/{id}", nonExistingId)
+                .delete("/polls/{publicId}", nonExistingId)
                 .then()
                 .statusCode(404);
     }
@@ -571,7 +574,7 @@ public class PollResourceTest {
         given()
                 .header("Authorization", "Bearer " + otherUserContext.token())
                 .when()
-                .delete("/polls/{id}", poll.id)
+                .delete("/polls/{publicId}", poll.publicId)
                 .then()
                 .statusCode(403);
     }
