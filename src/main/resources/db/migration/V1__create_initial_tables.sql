@@ -10,6 +10,7 @@ CREATE UNIQUE INDEX users_email_lower_case_idx ON users (LOWER(email));
 
 CREATE TABLE Poll(
     id BIGSERIAL primary key,
+    publicId UUID unique not null,
     title varchar(200) not null,
     description varchar(5000),
     createdTimestamp timestamp,
