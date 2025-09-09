@@ -3,17 +3,18 @@ package com.pollservice.poll;
 import jakarta.persistence.*;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.validation.constraints.NotBlank;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 public class Poll extends PanacheEntityBase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
+
+    public UUID publicId;
 
     @NotBlank(message = "Title must not be blank at the entity level.")
     @Column(length = 200, nullable = false)
@@ -35,6 +36,7 @@ public class Poll extends PanacheEntityBase {
     @PrePersist
     public void prePersist() {
         this.createdTimestamp = Instant.now();
+        this.publicId = UUID.randomUUID();
     }
 
     @PreUpdate

@@ -12,6 +12,8 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 
+import java.util.UUID;
+
 @Path("/polls")
 public class PollResource {
     @Inject
@@ -36,29 +38,29 @@ public class PollResource {
     }
 
     @GET
-    @Path("/{id}")
-    public Response getPoll(@PathParam("id") Long id) {
-        PollResponse pollResponse = pollService.getPoll(id, authenticatedUser);
+    @Path("/{publicId}")
+    public Response getPoll(@PathParam("publicId") UUID publicId) {
+        PollResponse pollResponse = pollService.getPoll(publicId);
         return Response.status(Response.Status.OK).entity(pollResponse).build();
     }
 
     @PATCH
-    @Path("/{id}")
-    public Response updatePoll(@PathParam("id") Long id, @Valid UpdatePollRequest updatePollRequest) {
+    @Path("/{publicId}")
+    public Response updatePoll(@PathParam("publicId") UUID publicId, @Valid UpdatePollRequest updatePollRequest) {
         String realUserId = securityIdentity.getPrincipal().getName();
         AuthenticatedUser realUser = new AuthenticatedUser(realUserId);
 
-        PollResponse pollResponse = pollService.updatePoll(id, updatePollRequest, realUser);
+        PollResponse pollResponse = pollService.updatePoll(publicId, updatePollRequest, realUser);
         return Response.status(Response.Status.OK).entity(pollResponse).build();
     }
 
     @DELETE
-    @Path("/{id}")
-    public Response deletePoll(@PathParam("id") Long id) {
+    @Path("/{publicId}")
+    public Response deletePoll(@PathParam("publicId") UUID publicId) {
         String realUserId = securityIdentity.getPrincipal().getName();
         AuthenticatedUser realUser = new AuthenticatedUser(realUserId);
 
-        pollService.deletePoll(id, realUser);
+        pollService.deletePoll(publicId, realUser);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 }

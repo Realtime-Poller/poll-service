@@ -13,6 +13,7 @@ import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotFoundException;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @ApplicationScoped
 public class PollService {
@@ -29,7 +30,7 @@ public class PollService {
         poll.persist();
 
         return new PollResponse(
-                poll.id,
+                poll.publicId,
                 poll.getTitle(),
                 poll.getDescription(),
                 poll.getCreatedTimestamp(),
@@ -37,14 +38,14 @@ public class PollService {
         );
     }
 
-    public PollResponse getPoll(long id, AuthenticatedUser authenticatedUser) {
-        Poll poll = Poll.findById(id);
+    public PollResponse getPoll(UUID publicId) {
+        Poll poll = Poll.find("publicId", publicId).firstResult();
         if (poll == null) {
             throw new NotFoundException("Poll not found");
         }
 
         return new PollResponse(
-                poll.id,
+                poll.publicId,
                 poll.getTitle(),
                 poll.getDescription(),
                 poll.getCreatedTimestamp(),
@@ -53,13 +54,13 @@ public class PollService {
     }
 
     @Transactional
-    public PollResponse updatePoll(long id, UpdatePollRequest updatePollRequest, AuthenticatedUser authenticatedUser) {
+    public PollResponse updatePoll(UUID publicId, UpdatePollRequest updatePollRequest, AuthenticatedUser authenticatedUser) {
         User suspectedPollOwner = User.findById(Long.valueOf(authenticatedUser.id()));
         if(suspectedPollOwner == null) {
-            throw new UnauthorizedException("User not authenticated");
+            throw new UnauthorizedException("User not authorized");
         }
 
-        Poll pollToBeUpdated = Poll.findById(id);
+        Poll pollToBeUpdated = Poll.find("publicId", publicId).firstResult();
         if (pollToBeUpdated == null) {
             throw new NotFoundException("Poll not found");
         }
@@ -88,7 +89,7 @@ public class PollService {
         }
 
         return new PollResponse(
-                pollToBeUpdated.id,
+                pollToBeUpdated.publicId,
                 pollToBeUpdated.getTitle(),
                 pollToBeUpdated.getDescription(),
                 pollToBeUpdated.getCreatedTimestamp(),
@@ -97,13 +98,13 @@ public class PollService {
     }
 
     @Transactional
-    public void deletePoll(long id, AuthenticatedUser authenticatedUser) {
+    public void deletePoll(UUID publicId, AuthenticatedUser authenticatedUser) {
         User suspectedPollOwner = User.findById(Long.valueOf(authenticatedUser.id()));
         if(suspectedPollOwner == null) {
-            throw new UnauthorizedException("User not authenticated");
+            throw new UnauthorizedException("User not authorized");
         }
 
-        Poll pollToBeDeleted = Poll.findById(id);
+        Poll pollToBeDeleted = Poll.find("publicId", publicId).firstResult();
         if (pollToBeDeleted == null) {
             throw new NotFoundException("Poll not found");
         }

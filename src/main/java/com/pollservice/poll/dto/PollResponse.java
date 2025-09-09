@@ -1,9 +1,10 @@
 package com.pollservice.poll.dto;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public class PollResponse {
-    public Long id;
+    public UUID publicId;
 
     public String title;
 
@@ -13,8 +14,8 @@ public class PollResponse {
 
     public Instant lastUpdatedTimestamp;
 
-    public PollResponse(Long id, String title, String description, Instant createdTimestamp, Instant lastUpdatedTimestamp) {
-        this.id = id;
+    public PollResponse(UUID publicId, String title, String description, Instant createdTimestamp, Instant lastUpdatedTimestamp) {
+        this.publicId = publicId;
         this.title = title;
         this.description = description;
         this.createdTimestamp = createdTimestamp;
