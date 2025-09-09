@@ -9,10 +9,8 @@ import io.restassured.http.ContentType;
 import io.smallrye.jwt.build.Jwt;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -55,25 +53,6 @@ public class PollResourceTest {
         return poll;
     }
 
-    private Long id;
-    private Instant createdTimestamp;
-    private String title;
-    private String description;
-
-    @Transactional
-    @BeforeEach
-    public void setup() {
-        Poll poll = new Poll();
-        poll.setTitle("test poll title");
-        poll.setDescription("test poll description");
-        poll.persist();
-
-        id = poll.id;
-        title = poll.getTitle();
-        description = poll.getDescription();
-        createdTimestamp = poll.getCreatedTimestamp();
-    }
-
     @AfterEach
     @Transactional
     public void cleanup() {
@@ -106,7 +85,7 @@ public class PollResourceTest {
         assertEquals("test poll", pollResponse.title);
         assertEquals("test poll description", pollResponse.description);
 
-        Poll savedPoll = Poll.findById(pollResponse.id);
+        Poll savedPoll = Poll.find("publicId", pollResponse.publicId).firstResult();
 
         User testUser = testUserContext.user();
         User pollOwner = savedPoll.getOwner();
@@ -195,7 +174,7 @@ public class PollResourceTest {
         assertEquals("ofcnsqnfkkprtokxzfimatehnvaylpykizxxnzorihjmzwmfwgemgogcueoizhdqlthjgwbzxbwjmwmhgdzdznwwsywwnpktokfejkjkmqvnrjczljliuowfpkzpguzcnebyldyhfetvnhbmyooiivcihyhzfdqxodemxqnorbqukykgigedgmbykfbozzztdhyoqsao"
                 , pollResponse.title);
         assertEquals("test poll description", pollResponse.description);
-        assertNotNull(pollResponse.id);
+        assertNotNull(pollResponse.publicId);
         assertNotNull(pollResponse.createdTimestamp);
     }
 
@@ -223,7 +202,7 @@ public class PollResourceTest {
 
         assertEquals("test poll", pollResponse.title);
         assertEquals("ofcnsqnfkkprtokxzfimatehnvaylpykizxxnzorihjmzwmfwgemgogcueoizhdqlthjgwbzxbwjmwmhgdzdznwwsywwnpktokfejkjkmqvnrjczljliuowfpkzpguzcnebyldyhfetvnhbmyooiivcihyhzfdqxodemxqnorbqukykgigedgmbykfbozzztdhyoqsaoq", pollResponse.description);
-        assertNotNull(pollResponse.id);
+        assertNotNull(pollResponse.publicId);
         assertNotNull(pollResponse.createdTimestamp);
     }
 
@@ -273,7 +252,7 @@ public class PollResourceTest {
         assertEquals("test poll", pollResponse.title);
         assertEquals("gffoldvcosxewlbaprzukliheymvfkhafjaonlgnyuajkztnnxbknpzqdktyjydnzabsiihljzrqnsxacgfmmeoveujlxhycxomzjefvnjgphmdslrwuppgeiyxmscotrbrokvxcnibtnkbtepqjhojolmfvvagmmkvypbjckeubslultzsinomuirpoldjjyijomxbdikvbiaycodfluzhaggfuegfsnotmjntlonnawjktjushtmihcdpavfcijnudzdckxkfeumxducosrvfypnqvdwlijbffolamnqlhhqqmmgygazrtjwwctebbgznuotnzbtxzhyffcyotclviehfyimlfzigfdldnqzrrscelyduzcstnhviawmaaspekkjngyileizqtajbrailtsneyjoduzxvxwmgmphedpeopoaakqtomwfstviholyczkexshxzmemjuixxitmazxtdsreinkyxafiochjnqciofspxvmgoqwcahjszidpzcovswhrxrvjkhfrovgkytvkkyshdsdkxyinywlihvrfvdvnpcavbtqhbdataooirfvrhdxflxhjxzodjmvqhiufvdbuodeaimkprkvtgavpszvatarvvfertrtgcmktdbxacmautiudyekeotkojifbdibzvjanxlyaviacuxghginoryzhogybjebykqigfipboxmhjeyoxkenugbtspudhyxczfkqbjoqhbghhcuhklunpbkrbdnrdqqmolxtapwnyicywtmydlfubuepcgedxeqosnjiqnkhrbskxywatjvmxbrpfkuojbxcssvybthvadxcqdtsduqyifnnsnyirqxcxmvbluqvolvnqbfvfbnvrnuiyugkvqgpfqmikbgpmbjofmuhbvrzfdbmbxfrztfxiambjnuqcalneytkdgvtqmawwlpbsztnfyiiertitvzabgbnbqvdfxvmcuvpmadeilqjkqvjpmlribfycjsmlzrvtbytbidwoxhtvafsnznakorfawudgscjrxhofyufpfagncshzjxwjafkislqmkavyzfxukqeuefohbnofhweacfoiuykewhaoqbxkimgsqkodyxkaztiooadsezgzzwezilvwcrybufvxdelhlzkfxfnragegyhuxjuxamwexhnagbwvugqlmxfsbrflvgajssmdqygljovdhpnccdphfdsxgpyekxbpdfvmnvnobawdwlzscyaqvrlserurqcyjmckpqgcnnqzbynsptuocfwuswhnhrrtffbbspbzlznafsylgxvhzaujeqehwxbihaepwjdewwqurunazzfwsgzinpngcwycjelezxupysbqpdwdvtlmpdpbktbvujnpbjmrcyoswlvvyovpwdpfpfcccukhcckjwolfqtrcxsvuqjgbidskeghzevemazrskdtwgwnrgijxbnlffmsyscsjoqovxqapkgeqsmndxpmrcgbcsgcdfxfubmprphsaxibdcjtztqlpmgpmbzwgrxecwaypyeizuguwiusqessrmtcaotczirtkmbaeoosolsfptythnyncafxpeqlwxuqaajrfdariaursirvpqngtwsgkcoolamuyotywsjlshebsxyginmhogznkckyruvirnexfwgkfsnpghdfcwljqyfijziamkvkjjzhjflfpnsfxwjgbwkmompphnuvllqhodztoajrqqwhvhvfwmqatzzgulncvkjwfxgdsiqrkettclytnltmnnwzehnnwkdhqmflclzxbkhlslbbdftywyhvvanhjkjczorqiposmtraaibxoqyqtaaqvqkkcsqmmndqwuydyvvnwwqqtrroyauksqxvrsjyjcnbkcbupszhygvjbwbayzfbnsujcwxlxztcnhrdgldbgpocnbbsnryzdnzxgmgebfuseiyvstoughyliqulrvlprbztjrzusfhevkarfziholgklkczfpshvvcpydurynjkamistequfxayzrfukrgpbfwqazvammfkkwncddgojexglgdgdocgsopdjdoqievnaocrjurbqyuafjnrjyvrntocxoxaabpqbnujxluyifwiiqsrxiibjpagustjxripyurpjifakkjyvqikzvecoxbtwgcfxgtmzlywmhxizxvkrcntqkzeukpvouzhjnbgbecsrzywiyqisvvpqojteibqfnztzvouaczsvvmtugvcesorcnfytjbgkguldoxewbtxiympgynlynphftezgawdbjomftcizurbpsxujkpxvfgqcqluegdmnngzktkogwrcshafrqnpisocwptlyxqwqbfzexoqjjhndidtszvpraefenbqpccaawtcijtjurgorcmkdrrqibjtweevngcookfbikcdiaobmlzkdorefqltqnlemavnnewlhxpyjoloteyowqxaskxhkksgfqsolanrdgifumwwgabjnxrxdurqegbwtvrqbafqmxfeydskckpefvxzjufckvqfkqwsppmhepfqdxvmhqjhobpiejbjcvxxdwxqjiarltymdpltypjotcrewyjefyresqmfvmtrynhwvsjmiejifbtfmmceoarzwletqhfbytavnpojgnajjjvssfvyrxhzzfyljcrkxufjcphjyuktntudkpebkhvciswpjhumfzcvtbhnucfnocwuszgwcedqhqbruymkorzxocqckvgbkopprwyabervvikghincvoxcbhchgywbrmutjlhimqsxjhhjlfllrvzdsgoqxwgydmzinfhvvfqeyrfdupabhnezbzyuduviewvzlyrkshqvqyuqdofpylebxhbrvdjhqzrkqgudgfecahglrvijrmhjfaoblwugebajvaijajmuzwbrpiqzumpczpfoxogwlbnrbxbxhtgzjsarheubrwprlkaspnrctotiykjywwutqbzumrovgxrqpzmwktnaldmwlfovkpxgxmsowmgdoqxrcplhvpexpntngowibyrkjmubepsjbfwcqjpkamcttgstrnjawnsizrdmlrdqrmuxohlcauawnyisqqzzayzlmigmhyjrgxsiafxfsvlxnbfczjtzicyfxnzakqbefwrpprjgufwqkfprnezjjnyqgztagcpbflsvxiijwnmfvvfkefpqqpewjghmwwiuyboskwnxetfnszjkbeifrhwpaumkjequyvhairyaiitxjxaflvsffkdwaclogkufwalypkpywkusmksxfsvdlvdyqtcpoaekrwyuwbcxnxydkiwvslwjpbwcuuzoiquungcvvjagnaslcwdujsfxdbeiwofadupqwzznoeprjwuhmsjkdctjxgpnebxzptoqqnzbjrwylagxyhjzpffbwzgwhdscjsclbbqqgnevkeqofxiqwplcepjchkeaqerzhxsyvcmtddywdljhhokhpgqsncuvdqobviklckipyavtsbtuszrquhkmmbdzlgjyhpemzughainodjfvxchyvgtkdyaqeajokkzgwhwgmdkggoiuskxvxjwhsfsdaavgwkuhrizvdtylptrbsxqpbjjjwerjxepcaciymtxtcumvqdbhvefpvlzxtrioqxzebzfrghgskheomvfgduosoyrcjzjbrhquesqyblbnbnjcvfowpfiwwhscjqnjzoytivcgulhpmxzvaldqhitbxbpcxcqbytusbubqucswsiokxankojqyhygtghdspuquslqqmjknzsumnynxxtsqtnabfcmcfeiqsjatlavquxqstcbdxznewrgmkmvnylkuubizqrksbmssbctvxuyiupbsgjflzlxeotmomuxlensomxunmwcdgvxzivurgtcmtunwqxyjzttnjpdqmbhdfgsnylingvymtylxnxldmlfsafrwakeubpdcmvfkidykrugrpjuuecmuiyovszjfuiiobstnnzgufmsgmmhxzvtoxychwhkbnjkmwkdxpkvhenczvssnowgzrtzuxwjulotvssbjkvfskgsntsvprfwakwpruruopbvgrkweofgscdilsaietzaaagjmrqskrxtjvytwbyrsphxbhdramcwwftrskvpfehjycwcgmkbbgyuvzgxyfpqlitnylkurhxvybcbyftwpwnrwgapobplivjwssoaegcldgftxjxhboejxyeveuajoxapiztkrvckajxdewpzhmvfgeuzhskjdgiwmlriymcmcixklqtuotcirmztkbqpgaretxtmoqzaesevahxeknfeqfhibojklrpgtrwomsadcpurtladktxvdmvorxqfftftjhubkkeipxqsgjnyvkacibcnnnppveeqnhzenhcchcciybakzdpuzqexnqqnrmljhpzrlfimjxyuragckfddrkgoymqdlpzwmwuonwpesubyurlxxtxfvhkqqavvfevgxbrxghxqftqztjkoqwopiftkvmjeabdffeitpydekihpfmparasqshumabwxfinytrqnconindlrntjjsfurdqeguindsrofaclpsisdexotnvxiekbyqotxilpeukeoprcydrvcecisjtmzqgwbideneydnbuoihptjhlikyjzvaqnxhjyealclioppptkvauibfzywonegamaeyzvoactgmcxtwrtbebwpszuyhbwvjmpnefbckeoshtrjqdghpengycesjofdmcbaoxjbqlkjbwqeutmlfzglvgkxzcuedwsrdkdyjsjjyfrkucyzqbfrouumoojgzwpaskqtvrvaaplhatnwievxmpoaljzuxvadggvuqpxpgghzbjajaxfuaosxrriussgovbrqdmvkvaqzfkvfwtypeeitsmwqzhwgzdnzuvwvtskciwunqomitpujpyvnj"
                 , pollResponse.description);
-        assertNotNull(pollResponse.id);
+        assertNotNull(pollResponse.publicId);
         assertNotNull(pollResponse.createdTimestamp);
     }
 
@@ -300,31 +279,37 @@ public class PollResourceTest {
 
     @Test
     public void testGetPoll() {
+        // Arrange
+        TestUserContext testUserContext = setUpNewUserAndToken("default@cmpleom");
+        Poll poll = createPollForUser(testUserContext.user, "test poll title", "test poll description");
+
         // Act & Assert
         PollResponse pollResponse =
                 given()
                         .contentType(ContentType.JSON)
                         .when()
-                        .get("/polls/{id}", id)
+                        .get("/polls/{publicId}", poll.publicId)
                         .then()
                         .statusCode(200)
                         .extract().as(PollResponse.class);
 
         assertEquals("test poll title", pollResponse.title);
         assertEquals("test poll description", pollResponse.description);
-        assertEquals(createdTimestamp.truncatedTo(ChronoUnit.MILLIS), pollResponse.createdTimestamp.truncatedTo(ChronoUnit.MILLIS));
-        assertEquals(id, pollResponse.id);
+        assertEquals(poll.getCreatedTimestamp().truncatedTo(ChronoUnit.MILLIS), pollResponse.createdTimestamp.truncatedTo(ChronoUnit.MILLIS));
+        assertEquals(poll.publicId, pollResponse.publicId);
     }
 
     @Test
     public void testGetPoll_NonExistingId() {
         //Assert
-        Long nonExistingId = id + 100;
+        TestUserContext testUserContext = setUpNewUserAndToken("default@existing.com");
+        Poll poll = createPollForUser(testUserContext.user, "test poll title", "test poll description");
+
         //Act & Assert
         given()
                 .contentType(ContentType.JSON)
                 .when()
-                .get("/polls/{id}", nonExistingId)
+                .get("/polls/{publicId}", poll.publicId + "1234567890")
                 .then()
                 .statusCode(404);
     }
@@ -353,7 +338,7 @@ public class PollResourceTest {
                         .statusCode(200)
                         .extract().as(PollResponse.class);
 
-        assertEquals(poll.id, pollResponse.id);
+        assertEquals(poll.publicId, pollResponse.publicId);
         assertEquals(poll.getCreatedTimestamp().truncatedTo(ChronoUnit.MILLIS), pollResponse.createdTimestamp.truncatedTo(ChronoUnit.MILLIS));
         assertEquals(newTitle, pollResponse.title);
         assertEquals(newDescription, pollResponse.description);
@@ -409,7 +394,7 @@ public class PollResourceTest {
                         .statusCode(200)
                         .extract().as(PollResponse.class);
 
-        assertEquals(poll.id, pollResponse.id);
+        assertEquals(poll.publicId, pollResponse.publicId);
         assertEquals(poll.getCreatedTimestamp().truncatedTo(ChronoUnit.MILLIS), pollResponse.createdTimestamp.truncatedTo(ChronoUnit.MILLIS));
         assertEquals(newTitle, pollResponse.title);
         assertEquals(poll.getDescription(), pollResponse.description);
@@ -439,7 +424,7 @@ public class PollResourceTest {
                         .statusCode(200)
                         .extract().as(PollResponse.class);
 
-        assertEquals(poll.id, pollResponse.id);
+        assertEquals(poll.publicId, pollResponse.publicId);
         assertEquals(poll.getCreatedTimestamp().truncatedTo(ChronoUnit.MILLIS), pollResponse.createdTimestamp.truncatedTo(ChronoUnit.MILLIS));
         assertEquals(poll.getTitle(), pollResponse.title);
         assertEquals(newDescription, pollResponse.description);
@@ -535,7 +520,7 @@ public class PollResourceTest {
                         .statusCode(200)
                         .extract().as(PollResponse.class);
 
-        assertEquals(poll.id, pollResponse.id);
+        assertEquals(poll.publicId, pollResponse.publicId);
         assertEquals(poll.getCreatedTimestamp().truncatedTo(ChronoUnit.MILLIS), pollResponse.createdTimestamp.truncatedTo(ChronoUnit.MILLIS));
         assertEquals(poll.getTitle(), pollResponse.title);
         assertEquals(poll.getDescription(), pollResponse.description);
