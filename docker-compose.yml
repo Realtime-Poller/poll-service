@@ -10,6 +10,12 @@ services:
       - 5432:5432
     volumes:
       - db_data:/var/lib/postgresql/data
+    networks:
+      - poll-app-network
+
+networks:
+  poll-app-network:
+    external: true
 
 volumes:
   db_data:
