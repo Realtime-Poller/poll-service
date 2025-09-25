@@ -1,19 +1,13 @@
 package com.pollservice.poll;
 
 import com.pollservice.api.exception.EmailAlreadyExistsException;
-import com.pollservice.api.exception.InvalidCredentialsException;
 import com.pollservice.poll.dto.CreateUserRequest;
-import com.pollservice.poll.dto.LoginRequest;
-import com.pollservice.poll.dto.LoginResponse;
 import com.pollservice.poll.dto.UserResponse;
-import io.smallrye.jwt.build.Jwt;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
+import at.favre.lib.crypto.bcrypt.BCrypt;
 
-import io.quarkus.elytron.security.common.BcryptUtil;
 
-import java.util.Arrays;
-import java.util.HashSet;
 
 @ApplicationScoped
 public class UserService {
@@ -28,13 +22,13 @@ public class UserService {
 
         User user = new User();
         user.setEmail(normalizedEmail);
-        user.setPassword(BcryptUtil.bcryptHash(createUserRequest.password));
-
+        user.setPassword(BCrypt.withDefaults().hashToString(12, createUserRequest.password.toCharArray()));
         user.persist();
 
         return new UserResponse(user.id, user.getEmail());
     }
 
+    /**
     public LoginResponse login(LoginRequest loginRequest) {
         String normalizedEmail = loginRequest.email.toLowerCase();
         User user = User.find("email", normalizedEmail).firstResult();
@@ -48,7 +42,7 @@ public class UserService {
         }
 
         long tokenDurationInSeconds = 3600L;
-        String token = Jwt.issuer("https://poll-service-konrad.com")
+        String token = Jwt.issuer("http://localhost:8080/realms/PollsRealm")
                 .subject(user.id.toString())
                 .groups(new HashSet<>(Arrays.asList("user")))
                 .expiresIn(tokenDurationInSeconds)
@@ -58,4 +52,5 @@ public class UserService {
             token, "Bearer", tokenDurationInSeconds, user.getEmail()
         );
     }
+     **/
 }

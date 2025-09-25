@@ -2,6 +2,7 @@ package com.pollservice.poll;
 
 import com.pollservice.poll.dto.*;
 import io.quarkus.security.identity.SecurityIdentity;
+import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -18,12 +19,14 @@ public class UserResource {
     SecurityIdentity securityIdentity;
 
     @POST
+    @PermitAll
     @Path("")
     public Response createUser(@Valid CreateUserRequest createUserRequest) {
         UserResponse userResponse = userService.createUser(createUserRequest);
         return Response.status(Response.Status.CREATED).entity(userResponse).build();
     }
 
+    /**
     @POST
     @Path("/login")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -32,6 +35,7 @@ public class UserResource {
         LoginResponse loginResponse = userService.login(loginRequest);
         return Response.status(Response.Status.OK).entity(loginResponse).build();
     }
+     **/
 
     @GET
     @Path("/me")
