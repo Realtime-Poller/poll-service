@@ -115,4 +115,13 @@ public class PollService {
 
         pollToBeDeleted.delete();
     }
+
+
+    public Poll findPollByPublicId(UUID publicId) {
+        Poll poll = Poll.find("publicId", publicId).firstResult();
+        if (poll == null) {
+            throw new NotFoundException("Poll not found");
+        }
+        return poll;
+    }
 }
