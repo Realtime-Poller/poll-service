@@ -15,12 +15,10 @@ import org.keycloak.authorization.client.AuthorizationDeniedException;
 import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.representations.idm.authorization.AuthorizationRequest;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.keycloak.representations.idm.authorization.Permission;
 
 import java.security.Principal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Path("/polls")
 public class PollResource {
@@ -80,6 +78,7 @@ public class PollResource {
             String accessToken = jwt.getRawToken();
 
             AuthorizationRequest request = new AuthorizationRequest();
+
             request.addPermission("Poll", "poll:delete");
 
             Map<String, List<String>> claims = new HashMap<>();
