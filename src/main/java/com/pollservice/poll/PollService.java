@@ -4,7 +4,6 @@ import com.pollservice.poll.dto.CreatePollRequest;
 import com.pollservice.poll.dto.PollResponse;
 import com.pollservice.poll.dto.UpdatePollRequest;
 import com.pollservice.shared.AuthenticatedUser;
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.security.UnauthorizedException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -98,24 +97,10 @@ public class PollService {
     }
 
     @Transactional
-    public void deletePoll(UUID publicId, AuthenticatedUser authenticatedUser) {
-        User suspectedPollOwner = User.findById(Long.valueOf(authenticatedUser.id()));
-        if(suspectedPollOwner == null) {
-            throw new UnauthorizedException("User not authorized");
-        }
-
-        Poll pollToBeDeleted = Poll.find("publicId", publicId).firstResult();
-        if (pollToBeDeleted == null) {
-            throw new NotFoundException("Poll not found");
-        }
-
-        if (!suspectedPollOwner.id.equals(pollToBeDeleted.getOwner().id)) {
-            throw new ForbiddenException("You are not allowed to update this poll");
-        }
-
+    public void deletePoll(UUID publicId) {
+        Poll pollToBeDeleted = findPollByPublicId(publicId);
         pollToBeDeleted.delete();
     }
-
 
     public Poll findPollByPublicId(UUID publicId) {
         Poll poll = Poll.find("publicId", publicId).firstResult();

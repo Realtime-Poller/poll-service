@@ -14,7 +14,9 @@ import jakarta.ws.rs.core.Response;
 import org.keycloak.authorization.client.AuthorizationDeniedException;
 import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.representations.idm.authorization.AuthorizationRequest;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,24 +71,28 @@ public class PollResource {
         Poll pollToBeDeleted = pollService.findPollByPublicId(publicId);
 
         try {
-            AuthorizationRequest request = new AuthorizationRequest();
+            Principal principal = securityIdentity.getPrincipal();
 
+            if (!(principal instanceof JsonWebToken)) {
+                throw new ForbiddenException("Invalid token type.");
+            }
+            JsonWebToken jwt = (JsonWebToken) principal;
+            String accessToken = jwt.getRawToken();
+
+            AuthorizationRequest request = new AuthorizationRequest();
             request.addPermission("Poll", "poll:delete");
 
             Map<String, List<String>> claims = new HashMap<>();
             claims.put("owner", List.of(pollToBeDeleted.getOwner().id.toString()));
             request.setClaims(claims);
 
-            authzClient.authorization().authorize(request);
+            authzClient.authorization(accessToken).authorize(request);
 
-            String realUserId = securityIdentity.getPrincipal().getName();
-            AuthenticatedUser realUser = new AuthenticatedUser(realUserId);
-            pollService.deletePoll(publicId, realUser);
-
+            pollService.deletePoll(publicId);
             return Response.status(Response.Status.NO_CONTENT).build();
 
         } catch (AuthorizationDeniedException e) {
-            throw new ForbiddenException("You are not allowed to delete this poll");
+            throw new ForbiddenException("You are not authorized to delete this poll.");
         }
     }
 }
