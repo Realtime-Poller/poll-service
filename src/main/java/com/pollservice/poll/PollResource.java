@@ -15,10 +15,12 @@ import org.keycloak.authorization.client.AuthorizationDeniedException;
 import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.representations.idm.authorization.AuthorizationRequest;
 import org.eclipse.microprofile.jwt.JsonWebToken;
-import org.keycloak.representations.idm.authorization.Permission;
 
 import java.security.Principal;
 import java.util.*;
+
+import org.keycloak.representations.idm.authorization.PermissionRequest;
+import org.keycloak.representations.idm.authorization.PermissionResponse;
 
 @Path("/polls")
 public class PollResource {
@@ -77,21 +79,33 @@ public class PollResource {
             JsonWebToken jwt = (JsonWebToken) principal;
             String accessToken = jwt.getRawToken();
 
-            AuthorizationRequest request = new AuthorizationRequest();
+            if (authzClient == null) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("AuthzClient not configured").build();
+            }
 
-            request.addPermission("Poll", "poll:delete");
+            PermissionRequest permissionRequest = new PermissionRequest();
+            permissionRequest.setResourceId("Poll");
+            permissionRequest.setScopes(Set.of("poll:delete"));
 
             Map<String, List<String>> claims = new HashMap<>();
             claims.put("owner", List.of(pollToBeDeleted.getOwner().id.toString()));
-            request.setClaims(claims);
+            permissionRequest.setClaims(claims);
 
-            authzClient.authorization(accessToken).authorize(request);
+            PermissionResponse response = authzClient.protection().permission().create(permissionRequest);
+
+            String ticket = response.getTicket();
+
+            AuthorizationRequest authzRequest = new AuthorizationRequest(ticket);
+
+            authzClient.authorization(accessToken).authorize(authzRequest);
 
             pollService.deletePoll(publicId);
             return Response.status(Response.Status.NO_CONTENT).build();
 
         } catch (AuthorizationDeniedException e) {
             throw new ForbiddenException("You are not authorized to delete this poll.");
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
 }
