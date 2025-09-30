@@ -3,12 +3,9 @@ package com.pollservice.poll;
 import com.pollservice.poll.dto.CreatePollRequest;
 import com.pollservice.poll.dto.PollResponse;
 import com.pollservice.poll.dto.UpdatePollRequest;
-import com.pollservice.shared.AuthenticatedUser;
-import io.quarkus.security.UnauthorizedException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotFoundException;
 
 import java.time.Instant;
@@ -18,8 +15,8 @@ import java.util.UUID;
 public class PollService {
 
     @Transactional
-    public PollResponse createPoll(CreatePollRequest createPollRequest, AuthenticatedUser authenticatedUser) {
-        User pollOwner = User.findById(Long.valueOf(authenticatedUser.id()));
+    public PollResponse createPoll(CreatePollRequest createPollRequest, String authenticatedUserId) {
+        User pollOwner = User.findById(Long.valueOf(authenticatedUserId));
 
         Poll poll = new Poll();
         poll.setTitle(createPollRequest.title);
@@ -53,25 +50,16 @@ public class PollService {
     }
 
     @Transactional
-    public PollResponse updatePoll(UUID publicId, UpdatePollRequest updatePollRequest, AuthenticatedUser authenticatedUser) {
-        User suspectedPollOwner = User.findById(Long.valueOf(authenticatedUser.id()));
-        if(suspectedPollOwner == null) {
-            throw new UnauthorizedException("User not authorized");
-        }
-
+    public PollResponse updatePoll(UUID publicId, UpdatePollRequest updatePollRequest) {
         Poll pollToBeUpdated = Poll.find("publicId", publicId).firstResult();
         if (pollToBeUpdated == null) {
             throw new NotFoundException("Poll not found");
         }
 
-        if (!suspectedPollOwner.id.equals(pollToBeUpdated.getOwner().id)) {
-            throw new ForbiddenException("You are not allowed to update this poll");
-        }
-
         boolean updated = false;
 
-        if(updatePollRequest.title != null) {
-            if(updatePollRequest.title.isBlank()) {
+        if (updatePollRequest.title != null) {
+            if (updatePollRequest.title.isBlank()) {
                 throw new BadRequestException("Title, if provided, cannot be blank");
             }
             pollToBeUpdated.setTitle(updatePollRequest.title);
@@ -84,7 +72,7 @@ public class PollService {
         }
 
         if (updated) {
-            pollToBeUpdated.setLastUpdatedTimestamp(Instant.now()); // Added update timestamp due to timing issues with @PreUpdate flag on hibernate
+            pollToBeUpdated.setLastUpdatedTimestamp(Instant.now());
         }
 
         return new PollResponse(

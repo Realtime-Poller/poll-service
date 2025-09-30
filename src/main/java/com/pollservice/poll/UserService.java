@@ -27,30 +27,4 @@ public class UserService {
 
         return new UserResponse(user.id, user.getEmail());
     }
-
-    /**
-    public LoginResponse login(LoginRequest loginRequest) {
-        String normalizedEmail = loginRequest.email.toLowerCase();
-        User user = User.find("email", normalizedEmail).firstResult();
-
-        if (user == null) {
-            throw new InvalidCredentialsException("Invalid credentials");
-        }
-
-        if (!BcryptUtil.matches(loginRequest.password, user.getPassword())) {
-            throw new InvalidCredentialsException("Invalid credentials");
-        }
-
-        long tokenDurationInSeconds = 3600L;
-        String token = Jwt.issuer("http://localhost:8080/realms/PollsRealm")
-                .subject(user.id.toString())
-                .groups(new HashSet<>(Arrays.asList("user")))
-                .expiresIn(tokenDurationInSeconds)
-                .sign();
-
-        return new LoginResponse(
-            token, "Bearer", tokenDurationInSeconds, user.getEmail()
-        );
-    }
-     **/
 }

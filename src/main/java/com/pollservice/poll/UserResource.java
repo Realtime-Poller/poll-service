@@ -26,17 +26,6 @@ public class UserResource {
         return Response.status(Response.Status.CREATED).entity(userResponse).build();
     }
 
-    /**
-    @POST
-    @Path("/login")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response login(@Valid LoginRequest loginRequest) {
-        LoginResponse loginResponse = userService.login(loginRequest);
-        return Response.status(Response.Status.OK).entity(loginResponse).build();
-    }
-     **/
-
     @GET
     @Path("/me")
     @RolesAllowed("user")

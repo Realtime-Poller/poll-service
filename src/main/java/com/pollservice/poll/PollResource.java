@@ -4,9 +4,7 @@ package com.pollservice.poll;
 import com.pollservice.poll.dto.CreatePollRequest;
 import com.pollservice.poll.dto.PollResponse;
 import com.pollservice.poll.dto.UpdatePollRequest;
-import com.pollservice.shared.AuthenticatedUser;
 import io.quarkus.security.identity.SecurityIdentity;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -33,18 +31,11 @@ public class PollResource {
     @Inject
     AuthzClient authzClient;
 
-    //fake AuthenticatedUser
-    AuthenticatedUser authenticatedUser = new AuthenticatedUser("123456");
-
     @POST
     @Path("")
-    @RolesAllowed("user")
     public Response createPoll(@Valid CreatePollRequest createPollRequest) {
         String realUserId = securityIdentity.getPrincipal().getName();
-
-        AuthenticatedUser realUser = new AuthenticatedUser(realUserId);
-
-        PollResponse pollResponse = pollService.createPoll(createPollRequest, realUser);
+        PollResponse pollResponse = pollService.createPoll(createPollRequest, realUserId);
         return Response.status(Response.Status.CREATED).entity(pollResponse).build();
     }
 
@@ -58,10 +49,7 @@ public class PollResource {
     @PATCH
     @Path("/{publicId}")
     public Response updatePoll(@PathParam("publicId") UUID publicId, @Valid UpdatePollRequest updatePollRequest) {
-        String realUserId = securityIdentity.getPrincipal().getName();
-        AuthenticatedUser realUser = new AuthenticatedUser(realUserId);
-
-        PollResponse pollResponse = pollService.updatePoll(publicId, updatePollRequest, realUser);
+        PollResponse pollResponse = pollService.updatePoll(publicId, updatePollRequest);
         return Response.status(Response.Status.OK).entity(pollResponse).build();
     }
 
