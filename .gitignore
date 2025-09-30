@@ -118,6 +118,8 @@ fabric.properties
 .idea/**/azureSettings.xml
 
 .idea/sqldialects.xml
+.idea/dataSources.xml
+.idea/data_source_mapping.xml
 
 ### Java ###
 # Compiled class file
